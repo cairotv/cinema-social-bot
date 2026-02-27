@@ -1,0 +1,41 @@
+name: Test YouTube Round 4
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install yt-dlp --upgrade
+          pip install pytubefix
+
+      - name: Write cookies (if secret exists)
+        # ضع cookies YouTube في GitHub Secret باسم YOUTUBE_COOKIES
+        # إذا لم يكن موجوداً ستُتجاوز طرق الـ cookies تلقائياً
+        if: ${{ secrets.YOUTUBE_COOKIES != '' }}
+        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
+
+      - name: Run Tester Round 4
+        run: python youtube_tester_r4.py
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-round-4
+          path: |
+            results_r4.log
+            results_r4.json
+            winners_r4.json
